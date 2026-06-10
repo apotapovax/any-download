@@ -77,14 +77,17 @@ jobs:
 
       - name: Create update metadata
         run: |
-          cat > update-metadata.json <<EOF
-          {
-            "versionCode": ${{ steps.version.outputs.code }},
-            "versionName": "${{ steps.version.outputs.name }}",
-            "apkAssetName": "AnyDownload-arm64-v8a.apk",
-            "minSdk": 26
-          }
-          EOF
+          VERSION_CODE="${{ steps.version.outputs.code }}"
+          VERSION_NAME="${{ steps.version.outputs.name }}"
+          jq -n \
+            --argjson versionCode "$VERSION_CODE" \
+            --arg versionName "$VERSION_NAME" \
+            '{
+              versionCode: $versionCode,
+              versionName: $versionName,
+              apkAssetName: "AnyDownload-arm64-v8a.apk",
+              minSdk: 26
+            }' > update-metadata.json
           cat update-metadata.json
 
       - name: Resolve release tag

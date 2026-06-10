@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 android {
@@ -12,8 +13,8 @@ android {
         applicationId = "com.alexp.anydownload"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
 
         buildConfigField("String", "GITHUB_OWNER", "\"apotapovax\"")
         buildConfigField("String", "GITHUB_REPO", "\"any-download\"")
@@ -109,4 +110,10 @@ dependencies {
     implementation("io.github.junkfood02.youtubedl-android:ffmpeg:$youtubedlVersion")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom("$rootDir/detekt.yml")
+    baseline = file("detekt-baseline.xml")
 }
