@@ -4,17 +4,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.alexp.anydownload.update.AppUpdateUiState
 
 enum class DrawerDestination {
     Download,
@@ -95,7 +104,14 @@ fun AppDrawerSheet(
 }
 
 @Composable
-fun CreditsContent(modifier: Modifier = Modifier) {
+fun CreditsContent(
+    currentVersionName: String,
+    appUpdateState: AppUpdateUiState,
+    onCheckForUpdate: () -> Unit,
+    onDownloadUpdate: () -> Unit,
+    onInstallUpdate: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier.padding(16.dp),
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
@@ -104,6 +120,13 @@ fun CreditsContent(modifier: Modifier = Modifier) {
             text = "Credits",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
+        )
+        AppUpdateCard(
+            currentVersionName = currentVersionName,
+            state = appUpdateState,
+            onCheckForUpdate = onCheckForUpdate,
+            onDownloadUpdate = onDownloadUpdate,
+            onInstallUpdate = onInstallUpdate,
         )
         Text(
             text = "Supported for personal use",
@@ -121,5 +144,103 @@ fun CreditsContent(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+@Composable
+fun AppUpdateCard(
+    currentVersionName: String,
+    state: AppUpdateUiState,
+    onCheckForUpdate: () -> Unit,
+    onDownloadUpdate: () -> Unit,
+    onInstallUpdate: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(Icons.Default.SystemUpdate, contentDescription = null)
+                Text(
+                    text = "App updates",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            Text(
+                text = "Installed: v$currentVersionName",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = "Checks GitHub Releases for a newer signed APK. Android installs updates — it does not hot-reload app code.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            when (state) {
+                AppUpdateUiState.Idle -> Unit
+                AppUpdateUiState.Checking -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Text("Checking GitHub…")
+                    }
+                }
+                AppUpdateUiState.UpToDate -> {
+                    AssistChip(onClick = {}, label = { Text("Up to date") })
+                }
+                is AppUpdateUiState.Available -> {
+                    AssistChip(onClick = {}, label = { Text("Update available: v${state.versionName}") })
+                    if (state.releaseNotes.isNotBlank()) {
+                        Text(
+                            text = state.releaseNotes,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    Button(onClick = onDownloadUpdate, modifier = Modifier.fillMaxWidth()) {
+                        Text("Download update")
+                    }
+                }
+                is AppUpdateUiState.Downloading -> {
+                    Text("Downloading… ${state.percent.toInt()}%")
+                    androidx.compose.material3.LinearProgressIndicator(
+                        progress = { (state.percent / 100f).coerceIn(0f, 1f) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                is AppUpdateUiState.ReadyToInstall -> {
+                    Text("Downloaded v${state.versionName}. Ready to install.")
+                    Button(onClick = onInstallUpdate, modifier = Modifier.fillMaxWidth()) {
+                        Text("Install update")
+                    }
+                }
+                is AppUpdateUiState.Error -> {
+                    Text(
+                        text = state.message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+
+            OutlinedButton(
+                onClick = onCheckForUpdate,
+                enabled = state !is AppUpdateUiState.Checking && state !is AppUpdateUiState.Downloading,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Check for updates")
+            }
+        }
     }
 }

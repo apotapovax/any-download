@@ -9,6 +9,10 @@ import com.alexp.anydownload.data.CookieRepository
 import com.alexp.anydownload.data.DownloadHistoryRepository
 import com.alexp.anydownload.data.LoginPlatform
 import com.alexp.anydownload.data.VideoDownloadRepository
+import com.alexp.anydownload.update.AppUpdateInstaller
+import com.alexp.anydownload.update.AppUpdateUiState
+import com.alexp.anydownload.update.GitHubReleaseClient
+import com.alexp.anydownload.update.GitHubReleaseInfo
 import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +25,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val historyRepository = DownloadHistoryRepository(application)
     private val repository = VideoDownloadRepository(cookieRepository)
     private val app = application as AnyDownloadApp
+    private val gitHubReleaseClient = GitHubReleaseClient()
+    private var latestReleaseInfo: GitHubReleaseInfo? = null
 
     private val _urlInput = MutableStateFlow("")
     val urlInput: StateFlow<String> = _urlInput.asStateFlow()
@@ -45,6 +51,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _cookieMessage = MutableStateFlow<String?>(null)
     val cookieMessage: StateFlow<String?> = _cookieMessage.asStateFlow()
+
+    private val _appUpdateState = MutableStateFlow<AppUpdateUiState>(AppUpdateUiState.Idle)
+    val appUpdateState: StateFlow<AppUpdateUiState> = _appUpdateState.asStateFlow()
+
+    val currentVersionName: String = BuildConfig.VERSION_NAME
+    val currentVersionCode: Int = BuildConfig.VERSION_CODE
 
     init {
         viewModelScope.launch {
@@ -150,6 +162,99 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearCookieMessage() {
         _cookieMessage.value = null
+    }
+
+    fun checkForAppUpdate() {
+        if (_appUpdateState.value is AppUpdateUiState.Checking ||
+            _appUpdateState.value is AppUpdateUiState.Downloading
+        ) {
+            return
+        }
+
+        viewModelScope.launch {
+            _appUpdateState.value = AppUpdateUiState.Checking
+            gitHubReleaseClient.fetchLatestRelease()
+                .onSuccess { release ->
+                    latestReleaseInfo = release
+                    if (release.metadata.isNewerThan(BuildConfig.VERSION_CODE)) {
+                        _appUpdateState.value = AppUpdateUiState.Available(
+                            versionName = release.metadata.versionName,
+                            releaseNotes = release.releaseNotes,
+                        )
+                    } else {
+                        _appUpdateState.value = AppUpdateUiState.UpToDate
+                    }
+                }
+                .onFailure { error ->
+                    _appUpdateState.value = AppUpdateUiState.Error(
+                        friendlyAppUpdateError(error),
+                    )
+                }
+        }
+    }
+
+    fun downloadAppUpdate() {
+        val release = latestReleaseInfo
+        if (release == null) {
+            checkForAppUpdate()
+            return
+        }
+
+        viewModelScope.launch {
+            _appUpdateState.value = AppUpdateUiState.Downloading(0f)
+            val destination = AppUpdateInstaller.pendingApkFile(getApplication())
+            if (destination.exists()) {
+                destination.delete()
+            }
+
+            gitHubReleaseClient.downloadAsset(
+                downloadUrl = release.apkDownloadUrl,
+                destination = destination,
+                onProgress = { percent ->
+                    _appUpdateState.value = AppUpdateUiState.Downloading(percent)
+                },
+            ).onSuccess {
+                _appUpdateState.value = AppUpdateUiState.ReadyToInstall(release.metadata.versionName)
+            }.onFailure { error ->
+                _appUpdateState.value = AppUpdateUiState.Error(
+                    friendlyAppUpdateError(error),
+                )
+            }
+        }
+    }
+
+    fun installAppUpdate(context: Context): Boolean {
+        val apkFile = AppUpdateInstaller.pendingApkFile(context)
+        if (!apkFile.exists()) {
+            _appUpdateState.value = AppUpdateUiState.Error("Update file not found. Download again.")
+            return false
+        }
+
+        if (!AppUpdateInstaller.canInstallPackages(context)) {
+            AppUpdateInstaller.openInstallPermissionSettings(context)
+            _appUpdateState.value = AppUpdateUiState.Error(
+                "Allow \"Install unknown apps\" for Any Download, then tap Install update again.",
+            )
+            return false
+        }
+
+        return AppUpdateInstaller.installDownloadedApk(context, apkFile)
+    }
+
+    private fun friendlyAppUpdateError(error: Throwable): String {
+        val message = error.message.orEmpty()
+        return when {
+            message.contains("404", ignoreCase = true) ->
+                "No GitHub release found yet. Publish a release first."
+            message.contains("403", ignoreCase = true) ||
+                message.contains("rate limit", ignoreCase = true) ->
+                "GitHub rate limit hit. Try again in a few minutes."
+            message.contains("update-metadata.json", ignoreCase = true) ||
+                message.contains("AnyDownload-arm64-v8a.apk", ignoreCase = true) ->
+                message
+            message.isNotBlank() -> message
+            else -> "Could not check for updates."
+        }
     }
 
     private fun needsCookiesFor(url: String): Boolean {

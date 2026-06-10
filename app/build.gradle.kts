@@ -15,6 +15,9 @@ android {
         versionCode = 1
         versionName = "1.0.0"
 
+        buildConfigField("String", "GITHUB_OWNER", "\"apotapovax\"")
+        buildConfigField("String", "GITHUB_REPO", "\"any-download\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -30,6 +33,24 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+                ?: project.findProperty("RELEASE_STORE_FILE") as String?
+            val keystoreFile = keystorePath?.let(::file)?.takeIf { it.exists() }
+
+            if (keystoreFile != null) {
+                storeFile = keystoreFile
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                    ?: project.findProperty("RELEASE_STORE_PASSWORD") as String?
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                    ?: project.findProperty("RELEASE_KEY_ALIAS") as String?
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+                    ?: project.findProperty("RELEASE_KEY_PASSWORD") as String?
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -38,6 +59,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            signingConfig = signingConfigs.getByName("release").takeIf {
+                it.storeFile?.exists() == true
+            }
         }
     }
 
@@ -52,6 +76,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {

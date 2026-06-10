@@ -85,6 +85,7 @@ fun MainScreen(
     val updateMessage by viewModel.updateMessage.collectAsState()
     val cookieStatus by viewModel.cookieStatus.collectAsState()
     val cookieMessage by viewModel.cookieMessage.collectAsState()
+    val appUpdateState by viewModel.appUpdateState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val drawerState = rememberDrawerState(initialValue = androidx.compose.material3.DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -216,11 +217,21 @@ fun MainScreen(
                     }
                 }
 
-                DrawerDestination.Credits -> CreditsContent(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                )
+                DrawerDestination.Credits -> {
+                    LaunchedEffect(Unit) {
+                        viewModel.checkForAppUpdate()
+                    }
+                    CreditsContent(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        currentVersionName = viewModel.currentVersionName,
+                        appUpdateState = appUpdateState,
+                        onCheckForUpdate = viewModel::checkForAppUpdate,
+                        onDownloadUpdate = viewModel::downloadAppUpdate,
+                        onInstallUpdate = { viewModel.installAppUpdate(context) },
+                    )
+                }
             }
         }
     }

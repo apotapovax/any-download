@@ -1,4 +1,5 @@
 -keep class com.yausername.youtubedl_android.** { *; }
 -keep class com.yausername.ffmpeg.** { *; }
+-keep class com.alexp.anydownload.BuildConfig { *; }
 -dontwarn org.apache.commons.**
 -dontwarn org.bouncycastle.**

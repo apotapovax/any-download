@@ -57,3 +57,9 @@ See [PLAN.md](./PLAN.md) for:
 - **Private or login-required** Instagram/Facebook posts usually fail without browser cookies (planned for v2)
 - **YouTube** may break when Google changes bot checks — update yt-dlp when needed
 - **APK is large** (~100 MB) because Python + yt-dlp + FFmpeg are bundled
+
+## Releases & in-app updates
+
+Signed APKs are published to [GitHub Releases](https://github.com/apotapovax/any-download/releases). The app can check for updates under **Menu → Credits**.
+
+See [RELEASE.md](./RELEASE.md) for keystore setup, tagging, and CI workflow.
