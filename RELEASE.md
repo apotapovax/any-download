@@ -29,6 +29,16 @@ In the repo: **Settings → Secrets and variables → Actions → New repository
 | `ANDROID_KEY_ALIAS` | `anydownload` (default from script) |
 | `ANDROID_KEY_PASSWORD` | key password |
 
+GitHub stores these as **encrypted repository secrets**. They are injected into the release workflow at runtime only, masked in logs, and never written to the repo. The workflow also deletes `release.keystore` after each run and refuses to fall back to unsigned APKs when secrets are missing.
+
+### Secret safety in CI
+
+- Secrets are **not** committed to git (`release.keystore` is gitignored).
+- The workflow runs **only** on `apotapovax/any-download` (not forks).
+- Gradle runs with `--quiet` to avoid verbose logs.
+- Keystore file is removed in an `always()` cleanup step.
+- Only the signed APK and `update-metadata.json` are uploaded to Releases — never the keystore or passwords.
+
 ### 4. Optional local release signing
 
 Add to `local.properties` (gitignored):
