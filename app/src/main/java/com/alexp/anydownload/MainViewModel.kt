@@ -13,6 +13,8 @@ import com.alexp.anydownload.update.AppUpdateInstaller
 import com.alexp.anydownload.update.AppUpdateUiState
 import com.alexp.anydownload.update.GitHubReleaseClient
 import com.alexp.anydownload.update.GitHubReleaseInfo
+import com.alexp.anydownload.update.InstallResult
+import com.alexp.anydownload.update.UpdateInstallBus
 import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,7 +60,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val currentVersionName: String = BuildConfig.VERSION_NAME
     val currentVersionCode: Int = BuildConfig.VERSION_CODE
 
+    private val installResultListener: (InstallResult) -> Unit = { result ->
+        when (result) {
+            InstallResult.Success -> {
+                _appUpdateState.value = AppUpdateUiState.UpToDate
+            }
+            is InstallResult.Failure -> {
+                _appUpdateState.value = AppUpdateUiState.Error(result.message)
+            }
+        }
+    }
+
     init {
+        UpdateInstallBus.subscribe(installResultListener)
         viewModelScope.launch {
             app.engineState.collect { engine ->
                 when (engine) {
@@ -91,6 +105,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 }
             }
+        }
+    }
+
+    override fun onCleared() {
+        UpdateInstallBus.unsubscribe(installResultListener)
+        super.onCleared()
+    }
+
+    fun isDebuggableInstall(context: Context): Boolean {
+        return AppUpdateInstaller.isDebuggableInstall(context)
+    }
+
+    fun updateInstallWarning(context: Context): String? {
+        return if (AppUpdateInstaller.isDebuggableInstall(context)) {
+            "This is a debug install. GitHub release updates won't install in place — uninstall first, then install the release APK from GitHub."
+        } else {
+            null
         }
     }
 
@@ -227,6 +258,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val apkFile = AppUpdateInstaller.pendingApkFile(context)
         if (!apkFile.exists()) {
             _appUpdateState.value = AppUpdateUiState.Error("Update file not found. Download again.")
+            return false
+        }
+
+        updateInstallWarning(context)?.let { warning ->
+            _appUpdateState.value = AppUpdateUiState.Error(warning)
             return false
         }
 

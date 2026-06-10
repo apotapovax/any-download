@@ -227,6 +227,7 @@ fun MainScreen(
                             .padding(padding),
                         currentVersionName = viewModel.currentVersionName,
                         appUpdateState = appUpdateState,
+                        installWarning = viewModel.updateInstallWarning(context),
                         onCheckForUpdate = viewModel::checkForAppUpdate,
                         onDownloadUpdate = viewModel::downloadAppUpdate,
                         onInstallUpdate = { viewModel.installAppUpdate(context) },

@@ -110,6 +110,7 @@ fun CreditsContent(
     onCheckForUpdate: () -> Unit,
     onDownloadUpdate: () -> Unit,
     onInstallUpdate: () -> Unit,
+    installWarning: String? = null,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -124,6 +125,7 @@ fun CreditsContent(
         AppUpdateCard(
             currentVersionName = currentVersionName,
             state = appUpdateState,
+            installWarning = installWarning,
             onCheckForUpdate = onCheckForUpdate,
             onDownloadUpdate = onDownloadUpdate,
             onInstallUpdate = onInstallUpdate,
@@ -151,6 +153,7 @@ fun CreditsContent(
 fun AppUpdateCard(
     currentVersionName: String,
     state: AppUpdateUiState,
+    installWarning: String?,
     onCheckForUpdate: () -> Unit,
     onDownloadUpdate: () -> Unit,
     onInstallUpdate: () -> Unit,
@@ -185,6 +188,13 @@ fun AppUpdateCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            installWarning?.let { warning ->
+                Text(
+                    text = warning,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
 
             when (state) {
                 AppUpdateUiState.Idle -> Unit

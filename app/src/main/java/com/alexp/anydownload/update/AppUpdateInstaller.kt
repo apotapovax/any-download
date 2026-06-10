@@ -1,7 +1,10 @@
 package com.alexp.anydownload.update
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -15,6 +18,10 @@ object AppUpdateInstaller {
 
     fun pendingApkFile(context: Context): File {
         return File(updatesDir(context), GitHubReleaseClient.APK_ASSET_NAME)
+    }
+
+    fun isDebuggableInstall(context: Context): Boolean {
+        return (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     }
 
     fun canInstallPackages(context: Context): Boolean {
@@ -42,6 +49,42 @@ object AppUpdateInstaller {
             return false
         }
 
+        return runCatching {
+            installWithPackageInstaller(context, apkFile)
+        }.getOrElse {
+            installWithIntent(context, apkFile)
+        }
+    }
+
+    private fun installWithPackageInstaller(context: Context, apkFile: File): Boolean {
+        val installer = context.packageManager.packageInstaller
+        val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+        val sessionId = installer.createSession(params)
+        val session = installer.openSession(sessionId)
+
+        session.use { activeSession ->
+            apkFile.inputStream().use { input ->
+                activeSession.openWrite("base.apk", 0, apkFile.length()).use { output ->
+                    input.copyTo(output)
+                    activeSession.fsync(output)
+                }
+            }
+
+            val callbackIntent = Intent(context, InstallResultReceiver::class.java).apply {
+                action = InstallResultReceiver.ACTION_INSTALL_RESULT
+            }
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+            val pendingIntent = PendingIntent.getBroadcast(context, sessionId, callbackIntent, flags)
+            activeSession.commit(pendingIntent.intentSender)
+        }
+        return true
+    }
+
+    private fun installWithIntent(context: Context, apkFile: File): Boolean {
         val uri = FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
