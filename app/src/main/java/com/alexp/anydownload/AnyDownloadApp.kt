@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AnyDownloadApp : Application() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -45,19 +46,36 @@ class AnyDownloadApp : Application() {
     fun updateYtdlp(channel: YoutubeDL.UpdateChannel, onComplete: (EngineState.Ready) -> Unit) {
         appScope.launch {
             val current = _engineState.value
-            val previousVersion = (current as? EngineState.Ready)?.ytdlpVersion
-                ?: YtdlpEngine.currentVersion(this@AnyDownloadApp)
+            val previousVersion = when (current) {
+                is EngineState.Ready -> current.ytdlpVersion
+                is EngineState.Updating -> current.previousVersion
+                is EngineState.Failed -> YtdlpEngine.currentVersion(this@AnyDownloadApp)
+                else -> "unknown"
+            }
 
             _engineState.value = EngineState.Updating(previousVersion)
 
-            val result = YtdlpEngine.update(this@AnyDownloadApp, channel)
+            val result = runCatching {
+                YtdlpEngine.update(this@AnyDownloadApp, channel)
+            }.getOrElse { error ->
+                Log.e(TAG, "Manual yt-dlp update failed", error)
+                YtdlpEngine.InitResult(
+                    version = previousVersion,
+                    updateStatus = null,
+                    updateError = error.message ?: "Update failed",
+                )
+            }
+
             val ready = EngineState.Ready(
                 ytdlpVersion = result.version,
                 lastUpdateStatus = result.updateStatus,
                 lastUpdateError = result.updateError,
             )
             _engineState.value = ready
-            onComplete(ready)
+
+            withContext(Dispatchers.Main) {
+                onComplete(ready)
+            }
         }
     }
 

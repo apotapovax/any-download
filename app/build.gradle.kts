@@ -12,8 +12,8 @@ android {
         applicationId = "com.alexp.anydownload"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
 
         buildConfigField("String", "GITHUB_OWNER", "\"apotapovax\"")
         buildConfigField("String", "GITHUB_REPO", "\"any-download\"")

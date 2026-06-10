@@ -15,16 +15,29 @@ object YtdlpEngine {
         val updateError: String? = null,
     )
 
+    @Volatile
+    private var isInitialized = false
+
     suspend fun initialize(context: Context): InitResult = withContext(Dispatchers.IO) {
-        YoutubeDL.getInstance().init(context)
-        FFmpeg.getInstance().init(context)
-        update(context, YoutubeDL.UpdateChannel._STABLE)
+        ensureInitialized(context)
+        runCatching {
+            update(context, YoutubeDL.UpdateChannel._STABLE)
+        }.getOrElse { error ->
+            Log.w(TAG, "Startup yt-dlp update skipped", error)
+            InitResult(
+                version = currentVersion(context),
+                updateStatus = null,
+                updateError = error.message ?: "Startup update skipped",
+            )
+        }
     }
 
     suspend fun update(
         context: Context,
         channel: YoutubeDL.UpdateChannel = YoutubeDL.UpdateChannel._STABLE,
     ): InitResult = withContext(Dispatchers.IO) {
+        ensureInitialized(context)
+
         var status: YoutubeDL.UpdateStatus? = null
         var updateError: String? = null
 
@@ -34,6 +47,9 @@ object YtdlpEngine {
         } catch (e: YoutubeDLException) {
             updateError = e.message ?: "Update failed"
             Log.w(TAG, "yt-dlp update failed", e)
+        } catch (e: Exception) {
+            updateError = e.message ?: "Update failed"
+            Log.e(TAG, "yt-dlp update crashed", e)
         }
 
         InitResult(
@@ -43,8 +59,23 @@ object YtdlpEngine {
         )
     }
 
+    private fun ensureInitialized(context: Context) {
+        if (isInitialized) return
+
+        synchronized(this) {
+            if (isInitialized) return
+            YoutubeDL.getInstance().init(context)
+            FFmpeg.getInstance().init(context)
+            isInitialized = true
+            Log.i(TAG, "yt-dlp engine initialized")
+        }
+    }
+
     fun currentVersion(context: Context): String {
         return runCatching {
+            if (!isInitialized) {
+                ensureInitialized(context)
+            }
             YoutubeDL.getInstance().versionName(context)
         }.getOrNull()?.takeIf { it.isNotBlank() } ?: "unknown"
     }
