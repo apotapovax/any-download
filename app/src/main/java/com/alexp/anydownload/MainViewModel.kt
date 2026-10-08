@@ -16,6 +16,7 @@ import com.alexp.anydownload.update.GitHubReleaseInfo
 import com.alexp.anydownload.update.InstallResult
 import com.alexp.anydownload.update.UpdateInstallBus
 import com.yausername.youtubedl_android.YoutubeDL
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -202,19 +203,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _appUpdateState.value = AppUpdateUiState.Checking
             gitHubReleaseClient.fetchLatestRelease()
                 .onSuccess { release ->
                     latestReleaseInfo = release
-                    if (release.metadata.isNewerThan(BuildConfig.VERSION_CODE)) {
-                        _appUpdateState.value = AppUpdateUiState.Available(
+                    val nextState = if (release.metadata.isNewerThan(BuildConfig.VERSION_CODE)) {
+                        AppUpdateUiState.Available(
                             versionName = release.metadata.versionName,
                             releaseNotes = release.releaseNotes,
                         )
                     } else {
-                        _appUpdateState.value = AppUpdateUiState.UpToDate
+                        AppUpdateUiState.UpToDate
                     }
+                    _appUpdateState.value = nextState
                 }
                 .onFailure { error ->
                     _appUpdateState.value = AppUpdateUiState.Error(
@@ -231,7 +233,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _appUpdateState.value = AppUpdateUiState.Downloading(0f)
             val destination = AppUpdateInstaller.pendingApkFile(getApplication())
             if (destination.exists()) {
@@ -289,7 +291,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 message.contains("AnyDownload-arm64-v8a.apk", ignoreCase = true) ->
                 message
             message.isNotBlank() -> message
-            else -> "Could not check for updates."
+            else -> "${error.javaClass.simpleName}: Could not check for updates."
         }
     }
 

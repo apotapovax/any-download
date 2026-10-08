@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:MainScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun MainScreen( viewModel: MainViewModel, darkModeEnabled: Boolean, onDarkModeChanged: (Boolean) -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:MainViewModel.kt$MainViewModel$private fun friendlyError(error: Throwable): String</ID>
+    <ID>FunctionNaming:AppDrawer.kt$@Composable fun AppDrawerSheet( selected: DrawerDestination, onDestinationSelected: (DrawerDestination) -&gt; Unit, darkModeEnabled: Boolean, onDarkModeChanged: (Boolean) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:AppDrawer.kt$@Composable fun AppUpdateCard( currentVersionName: String, state: AppUpdateUiState, installWarning: String?, onCheckForUpdate: () -&gt; Unit, onDownloadUpdate: () -&gt; Unit, onInstallUpdate: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:AppDrawer.kt$@Composable fun CreditsContent( currentVersionName: String, appUpdateState: AppUpdateUiState, onCheckForUpdate: () -&gt; Unit, onDownloadUpdate: () -&gt; Unit, onInstallUpdate: () -&gt; Unit, installWarning: String? = null, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:DrawerSections.kt$@Composable fun DrawerCookiesCard( status: CookieStatus, onConnect: (LoginPlatform) -&gt; Unit, onDisconnect: (LoginPlatform) -&gt; Unit, onImport: () -&gt; Unit, onClearAll: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:DrawerSections.kt$@Composable fun DrawerEngineCard( ytdlpVersion: String, isUpdating: Boolean, onUpdate: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:DrawerSections.kt$@Composable fun PlatformConnectRow( platform: LoginPlatform, isConnected: Boolean, onConnect: () -&gt; Unit, onDisconnect: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:MainScreen.kt$@Composable private fun DownloadProgressCard( metadata: VideoMetadata, progress: Float, etaSeconds: Long?, )</ID>
+    <ID>FunctionNaming:MainScreen.kt$@Composable private fun HistoryItem( item: CompletedDownload, context: android.content.Context, onOpen: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:MainScreen.kt$@Composable private fun LoadingCard(message: String)</ID>
+    <ID>FunctionNaming:MainScreen.kt$@Composable private fun SuccessCard( title: String, filePath: String, onOpen: () -&gt; Unit, onDone: () -&gt; Unit, context: android.content.Context, )</ID>
+    <ID>FunctionNaming:MainScreen.kt$@Composable private fun UrlInputCard( url: String, onUrlChange: (String) -&gt; Unit, onPaste: () -&gt; Unit, onAnalyze: () -&gt; Unit, isBusy: Boolean, )</ID>
+    <ID>FunctionNaming:MainScreen.kt$@OptIn(ExperimentalLayoutApi::class) @Composable private fun DownloadContent( modifier: Modifier, urlInput: String, selectedFormatId: String, uiState: DownloadUiState, history: List&lt;CompletedDownload&gt;, onUrlChange: (String) -&gt; Unit, onPaste: () -&gt; Unit, onAnalyze: () -&gt; Unit, onFormatSelected: (String) -&gt; Unit, onDownload: () -&gt; Unit, onReset: () -&gt; Unit, context: android.content.Context, )</ID>
+    <ID>FunctionNaming:MainScreen.kt$@OptIn(ExperimentalLayoutApi::class) @Composable private fun MetadataCard( metadata: VideoMetadata, selectedFormatId: String, onFormatSelected: (String) -&gt; Unit, onDownload: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:MainScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun MainScreen( viewModel: MainViewModel, darkModeEnabled: Boolean, onDarkModeChanged: (Boolean) -&gt; Unit, )</ID>
+    <ID>FunctionNaming:PlatformLoginScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @SuppressLint("SetJavaScriptEnabled") @Composable fun PlatformLoginScreen( platform: LoginPlatform, onLoginCaptured: () -&gt; Unit, onCancel: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:ShareVideoButtons.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun ShareVideoButtons( context: Context, filePath: String, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:Theme.kt$@Composable fun AnyDownloadTheme( darkTheme: Boolean, content: @Composable () -&gt; Unit, )</ID>
+    <ID>InvalidPackageDeclaration:CookieStatus.kt$package com.alexp.anydownload</ID>
+    <ID>InvalidPackageDeclaration:Models.kt$package com.alexp.anydownload</ID>
+    <ID>InvalidPackageDeclaration:YtdlpEngine.kt$package com.alexp.anydownload</ID>
+    <ID>LongMethod:AppDrawer.kt$@Composable fun AppUpdateCard( currentVersionName: String, state: AppUpdateUiState, installWarning: String?, onCheckForUpdate: () -&gt; Unit, onDownloadUpdate: () -&gt; Unit, onInstallUpdate: () -&gt; Unit, )</ID>
+    <ID>LongMethod:DrawerSections.kt$@Composable fun DrawerCookiesCard( status: CookieStatus, onConnect: (LoginPlatform) -&gt; Unit, onDisconnect: (LoginPlatform) -&gt; Unit, onImport: () -&gt; Unit, onClearAll: () -&gt; Unit, )</ID>
+    <ID>LongMethod:MainScreen.kt$@OptIn(ExperimentalLayoutApi::class) @Composable private fun DownloadContent( modifier: Modifier, urlInput: String, selectedFormatId: String, uiState: DownloadUiState, history: List&lt;CompletedDownload&gt;, onUrlChange: (String) -&gt; Unit, onPaste: () -&gt; Unit, onAnalyze: () -&gt; Unit, onFormatSelected: (String) -&gt; Unit, onDownload: () -&gt; Unit, onReset: () -&gt; Unit, context: android.content.Context, )</ID>
+    <ID>LongMethod:MainScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun MainScreen( viewModel: MainViewModel, darkModeEnabled: Boolean, onDarkModeChanged: (Boolean) -&gt; Unit, )</ID>
+    <ID>LongMethod:PlatformLoginScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @SuppressLint("SetJavaScriptEnabled") @Composable fun PlatformLoginScreen( platform: LoginPlatform, onLoginCaptured: () -&gt; Unit, onCancel: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:AppDrawer.kt$( currentVersionName: String, appUpdateState: AppUpdateUiState, onCheckForUpdate: () -&gt; Unit, onDownloadUpdate: () -&gt; Unit, onInstallUpdate: () -&gt; Unit, installWarning: String? = null, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:AppDrawer.kt$( currentVersionName: String, state: AppUpdateUiState, installWarning: String?, onCheckForUpdate: () -&gt; Unit, onDownloadUpdate: () -&gt; Unit, onInstallUpdate: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:MainScreen.kt$( modifier: Modifier, urlInput: String, selectedFormatId: String, uiState: DownloadUiState, history: List&lt;CompletedDownload&gt;, onUrlChange: (String) -&gt; Unit, onPaste: () -&gt; Unit, onAnalyze: () -&gt; Unit, onFormatSelected: (String) -&gt; Unit, onDownload: () -&gt; Unit, onReset: () -&gt; Unit, context: android.content.Context, )</ID>
+    <ID>MagicNumber:CookieRepository.kt$CookieRepository$5</ID>
+    <ID>MagicNumber:CookieRepository.kt$CookieRepository$7</ID>
+    <ID>MagicNumber:GitHubReleaseClient.kt$GitHubReleaseClient$100f</ID>
+    <ID>MagicNumber:GitHubReleaseClient.kt$GitHubReleaseClient$200</ID>
+    <ID>MagicNumber:GitHubReleaseClient.kt$GitHubReleaseClient$299</ID>
+    <ID>MagicNumber:MainScreen.kt$8</ID>
+    <ID>MagicNumber:Theme.kt$0xFF00838F</ID>
+    <ID>MagicNumber:Theme.kt$0xFF0D2747</ID>
+    <ID>MagicNumber:Theme.kt$0xFF101418</ID>
+    <ID>MagicNumber:Theme.kt$0xFF1565C0</ID>
+    <ID>MagicNumber:Theme.kt$0xFF1A1F24</ID>
+    <ID>MagicNumber:Theme.kt$0xFF4DD0E1</ID>
+    <ID>MagicNumber:Theme.kt$0xFF90CAF9</ID>
+    <ID>MagicNumber:Theme.kt$0xFFF5F7FB</ID>
+    <ID>MagicNumber:UpdateMetadata.kt$UpdateMetadata.Companion$26</ID>
+    <ID>MagicNumber:VideoDownloadRepository.kt$VideoDownloadRepository$5_000</ID>
+    <ID>MagicNumber:WebViewCookieConverter.kt$WebViewCookieConverter$365</ID>
+    <ID>MatchingDeclarationName:AppDrawer.kt$DrawerDestination</ID>
+    <ID>MaxLineLength:AppDrawer.kt$text = "Checks GitHub Releases for a newer signed APK. Android installs updates — it does not hot-reload app code."</ID>
+    <ID>MaxLineLength:MainViewModel.kt$MainViewModel$"This is a debug install. GitHub release updates won't install in place — uninstall first, then install the release APK from GitHub."</ID>
+    <ID>MaxLineLength:VideoShareHelper.kt$ShareTarget$TELEGRAM : ShareTarget</ID>
+    <ID>ReturnCount:AppUpdateInstaller.kt$AppUpdateInstaller$fun installDownloadedApk(context: Context, apkFile: File): Boolean</ID>
+    <ID>ReturnCount:MainViewModel.kt$MainViewModel$fun installAppUpdate(context: Context): Boolean</ID>
+    <ID>ReturnCount:ShareEntryActivity.kt$ShareEntryActivity$private fun extractSharedText(intent: Intent): String?</ID>
+    <ID>ReturnCount:VideoShareHelper.kt$VideoShareHelper$fun shareVideo( context: Context, filePath: String, target: ShareTarget?, ): Boolean</ID>
+    <ID>TooGenericExceptionCaught:YtdlpEngine.kt$YtdlpEngine$e: Exception</ID>
+    <ID>TooManyFunctions:MainViewModel.kt$MainViewModel : AndroidViewModel</ID>
+    <ID>UseCheckOrError:CookieRepository.kt$CookieRepository$throw IllegalStateException("Login not completed. Finish signing in to ${platform.label} first.")</ID>
+    <ID>UseCheckOrError:CookieRepository.kt$CookieRepository$throw IllegalStateException("No cookies captured for ${platform.label}.")</ID>
+    <ID>UseCheckOrError:GitHubReleaseClient.kt$GitHubReleaseClient$throw IllegalStateException( "GitHub request failed ($code): ${errorBody.ifBlank { connection.responseMessage }}", )</ID>
+    <ID>UseCheckOrError:GitHubReleaseClient.kt$GitHubReleaseClient$throw IllegalStateException("Downloaded APK is empty.")</ID>
+    <ID>UseCheckOrError:GitHubReleaseClient.kt$GitHubReleaseClient$throw IllegalStateException("Release is missing $APK_ASSET_NAME.")</ID>
+    <ID>UseCheckOrError:GitHubReleaseClient.kt$GitHubReleaseClient$throw IllegalStateException("Release is missing $UPDATE_METADATA_ASSET.")</ID>
+    <ID>UseCheckOrError:VideoDownloadRepository.kt$VideoDownloadRepository$throw IllegalStateException( "Download finished but file was not found in ${downloadsDir.absolutePath}", )</ID>
+    <ID>UseRequire:CookieRepository.kt$CookieRepository$throw IllegalArgumentException( "Invalid cookies file. Use Connect buttons above, or export Netscape cookies.txt from a browser.", )</ID>
+  </CurrentIssues>
+</SmellBaseline>
